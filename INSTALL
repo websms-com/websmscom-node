@@ -1,0 +1,88 @@
+                                
+                                       I N S T A L L
+
+  Requirements
+  ------------
+
+  o  nodejs http://nodejs.org/   
+  o  npm (usually comes with nodejs)
+  o  node v0.6.3+, last tested with v0.8.14
+
+  Dependencies
+  ------------   
+  
+   o  none
+
+  Installation Instructions
+  -------------------------
+
+  With npm on command line:
+  
+    Directly from npm registry https://npmjs.org/ :
+      
+      Go to your node application (your project) and in the same folder write.
+
+      $ npm install websmscom
+      
+      done...
+    
+    OR in case you downloaded the package
+      
+      Put this file next to your node application in the same folder.
+
+      $ npm install websmscom-1.0.0.tgz 
+      
+        will create a local ./node_modules in the current directory
+        
+        In this directory you can now do "var websms = require('./websmscom')" in your js programs
+    
+    
+    OR just unpack / unzip websmscom-1.0.0.tgz 
+    
+      Put this file next to your node application in the same folder.
+             
+      $ tar -xf websmscom-1.0.0.tgz
+        
+        will unpack it to a directory named 'package' wherefrom you can install it:
+        
+      $ npm install ./package
+        
+        In this directory you can now do "var websms = require('./websmscom')" in your js programs
+      
+      
+    And that's it.
+  
+  
+  Additional Installation Info
+  ----------------------------    
+  
+  
+  In case you want to install it globally (add -g to any install suggestions above):
+  
+    $ sudo npm install -g websmscom-1.0.0.tgz
+  
+  If globally installed, websmscom can be called directly to send sms like:
+    $ websmscom --send --m="This is the message text" --r=4369912345678 --u Username --p Password
+  
+  For "Installed globally but cannot require() it" see:  
+   
+    https://npmjs.org/doc/faq.html#I-installed-something-globally-but-I-can-t-require-it
+  
+  For more help on install type:
+    $ npm help install
+    
+  
+  Sample Scripts
+  -------------------------
+  
+  Examples can be found in:
+  
+    o  Linux:   /usr/local/lib/node_modules/websmscom/example/
+    
+  OR when just unpacked locally and not installed globally 
+    
+    o  ./package/example/send_sms.js               (how to use websmscom.js)
+  
+  
+  
+  
