@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-module.exports = websms = require("./websmscom_lib")
+module.exports = websms = require("./websmscom_lib");
 
 
 // tests
@@ -121,7 +121,7 @@ if (module === require.main) {
         }
     });
     
-    var SetArguments = getValues(PossibleArguments)
+    var SetArguments = getValues(PossibleArguments);
     //console.log("Set arguments: \n", SetArguments);
     
     if (SetArguments['h'] || SetArguments['help']) {
@@ -139,7 +139,7 @@ if (module === require.main) {
 }
 
 function doTests() {
-    "use strict;"
+    'use strict';
     
     var assert = require("assert");
     console.log("Running module tests");
@@ -147,7 +147,8 @@ function doTests() {
     var recipientListOk    = ['4367612345678','4369912345678'];
     var messagetextOk      = "\u20acurozeichen";
     var recipientListError = ['+4367612345678','43-699-12345678'];
-    var messagetextError   = undefined;
+    var messagetextError;
+    var i;
     
     console.log("Text Message creation tests.");
     var messageOk;
@@ -167,7 +168,7 @@ function doTests() {
     var ttimerlabel = 'Message creation Time for '+m_amount+' new TextMessages';
     console.time(ttimerlabel);
     var messages=[];
-    for (var i=0;i<m_amount;i++) {
+    for (i=0;i<m_amount;i++) {
         messages[i] = new websms.TextMessage(recipientListOk,messagetextOk);
     }
     console.timeEnd(ttimerlabel);
@@ -200,7 +201,7 @@ function doTests() {
     var btimerlabel = 'Message creation Time for '+b_amount+' new BinaryMessages';
     console.time(btimerlabel);
     var binmessages=[];
-    for (var i=0;i<b_amount;i++) {
+    for (i=0;i<b_amount;i++) {
         binmessages[i] = new websms.BinaryMessage(recipientListOk, messageBinaryOk, true);
     }
     console.timeEnd(btimerlabel);
@@ -213,10 +214,10 @@ function doTests() {
     
     function callbackExpected(first){
         assert.ok(true, "Correct Callback");
-    };
+    }
     function callbackNotExpected(first){
         assert.ok(false, "Incorrect Callback");
-    };
+    }
    
     assert.doesNotThrow(function() {
         client.send(messageOk, -1, true, callbackNotExpected, callbackExpected); // calls error callback (ok)
@@ -259,16 +260,16 @@ function getValues(obj){
       }
     }
     return data;
-};
+}
 
 function transferredCallback(apiResponse, messageObject) {
     console.log(apiResponse);
-};
+}
 
 
 function notTransferredCallback(errorObj, messageObject){
     console.log(errorObj);
-};
+}
 
 function printUsage() {
     // node websmscom.js --g http://192.168.11.111:8443/bpapi --u swtest --p 1234 --r=4367612345678 --m="Superduper kann ich nur sagen!" --s "REIFI" --st="national" --f --c "http://localhost/callback" --id="--custom ID" --prio 9 --send --t --v

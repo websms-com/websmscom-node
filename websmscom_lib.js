@@ -16,7 +16,7 @@ var events = require('events');
   // Create a reference to this
   var WebSmsCom = {
   
-    VERSION: '1.0.0',
+    VERSION: '1.0.1',
     
     isDebug: false,
     
@@ -41,11 +41,11 @@ var events = require('events');
   // Export the WebSmsCom object 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = WebSmsCom;
-    root['websmscom'] = WebSmsCom;
+    root.websmscom = WebSmsCom;
     emitter = new events.EventEmitter();
     WebSmsCom.isNode = true;
   } else {
-    root['websmscom'] = WebSmsCom;
+    root.websmscom = WebSmsCom;
   }
   
   // helper function  
@@ -91,18 +91,18 @@ var events = require('events');
       };
     }
     WebSmsCom.applyIf(obj, {
-      'cause': WebSmsCom.errorCauses['parameter'],
+      'cause': WebSmsCom.errorCauses.parameter,
       'message': "Internal Error",
       'throwError': this.doThrowMessageCreationError
     });
+    WebSmsCom.log('getErrorObj error object:  ',obj);
     return obj;
   };
   
   /**
    * Wrapper for logger
    *   used like console.log
-   * @param {Object} errorObj
-   * @param {Object} errCb
+   * @param {Object} arguments
    */
   WebSmsCom.log = function(){
     if (WebSmsCom.isDebug) {
@@ -114,13 +114,14 @@ var events = require('events');
    * WebSmsCom.defaultErrorCallback
    *    function executed by error listeners
    * @param {Object} errorObj
-   * @param {Object} errCb
+   * @param {Object} cb
    */
-  WebSmsCom.defaultErrorCallback = function(errorObj, errCb, message){
+  WebSmsCom.defaultErrorCallback = function(errorObj, cb, message){
     WebSmsCom.log("WebSmsCom.defaultErrorCallback, errorObj:", errorObj);
-    if (errCb !== undefined) {
-      WebSmsCom.log("custom callback: ", errCb);
-      errCb(errorObj, message);
+    errorObj.messageObject = message;
+    if (cb !== undefined) {
+      WebSmsCom.log("custom callback: ", cb);
+      cb(errorObj, null);
     } else {
       WebSmsCom.log("default callback. ", errorObj);
     }
@@ -139,9 +140,10 @@ var events = require('events');
    */
   WebSmsCom.defaultOkCallback = function(cb, ApiResponse, message){
     WebSmsCom.log("WebSmsCom.defaultOkCallback, ApiResponse:", ApiResponse);
+    ApiResponse.messageObject = message;
     if (cb !== undefined) {
       WebSmsCom.log("custom ok callback: ", cb);
-      cb(ApiResponse, message);
+      cb(null, ApiResponse);
     } else {
       WebSmsCom.log("default ok callback. ");
       WebSmsCom.log(ApiResponse, message);
@@ -155,15 +157,18 @@ var events = require('events');
     
     events.EventEmitter.call(this);
     
+    
     // initialise Message stuff    
-    this.data = {};
-    this.data['recipientAddressList'] = [];
-    this.data['senderAddress'] = undefined;
-    this.data['senderAddressType'] = undefined;
-    this.data['sendAsFlashSms'] = undefined;
-    this.data['notificationCallbackUrl'] = undefined;
-    this.data['clientMessageId'] = undefined;
-    this.data['priority'] = undefined;
+    this.data = {
+      recipientAddressList: [],
+      senderAddress: undefined,
+      senderAddressType: undefined,
+      sendAsFlashSms: undefined,
+      notificationCallbackUrl: undefined,
+      clientMessageId: undefined,
+      priority: undefined
+    };
+   
     
     this.setRecipientAddressList(recipientAddressList);
   };
@@ -194,7 +199,6 @@ var events = require('events');
       if (!/^\d{1,15}$/.test(recipientAddressList[i])) {
         this.emit('error', WebSmsCom.getErrorObj("Recipient '" + recipientAddressList[i] + "' is invalid. (max. 15 digits full international MSISDN. Example: 4367612345678)"));
         return false;
-        WebSmsCom.log("After Emit");
       }
     }
     return true;
@@ -206,7 +210,7 @@ var events = require('events');
    * @return (Array) from message
    */
   WebSmsCom.Message.prototype.getRecipientAddressList = function(){
-    return this.data['recipientAddressList'];
+    return this.data.recipientAddressList;
   };
   /***
    * setRecipientAddressList
@@ -216,7 +220,7 @@ var events = require('events');
    */
   WebSmsCom.Message.prototype.setRecipientAddressList = function(recipientAddressList){
     if (this.checkRecipientAddressList(recipientAddressList)) {
-      this.data['recipientAddressList'] = recipientAddressList;
+      this.data.recipientAddressList = recipientAddressList;
     }
   };
   /***
@@ -241,7 +245,7 @@ var events = require('events');
    * @return {string} containing senderAddress of Message
    */
   WebSmsCom.Message.prototype.getSenderAddress = function(){
-    return this.data['senderAddress'];
+    return this.data.senderAddress;
   };
   /***
    * Set sender_address
@@ -253,12 +257,12 @@ var events = require('events');
    */
   WebSmsCom.Message.prototype.setSenderAddress = function(senderAddress){
     if (typeof senderAddress === 'string' || senderAddress === undefined) {
-      this.data['senderAddress'] = senderAddress;
+      this.data.senderAddress = senderAddress;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("sender_address '" + senderAddress + "' is invalid. Must be string containing numeric or alphanumeric value"));
       return;
     }
-    return this.data['senderAddress'];
+    return this.data.senderAddress;
   };
   
   /***
@@ -267,7 +271,7 @@ var events = require('events');
    * @return {string} containing one of ['national', 'international', 'alphanumeric' or 'shortcode']
    */
   WebSmsCom.Message.prototype.getSenderAddressType = function(){
-    return this.data['senderAddressType'];
+    return this.data.senderAddressType;
   };
   
   /***
@@ -279,11 +283,11 @@ var events = require('events');
    */
   WebSmsCom.Message.prototype.setSenderAddressType = function(senderAddressType){
     if (this.availableSenderAddressTypes[senderAddressType] === true || senderAddressType === undefined) {
-      this.data['senderAddressType'] = senderAddressType;
+      this.data.senderAddressType = senderAddressType;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("senderAddressType '" + senderAddressType + "' invalid. Must be one of '" + Object.keys(this.availableSenderAddressTypes) + "'."));
     }
-    return this.data['senderAddressType'];
+    return this.data.senderAddressType;
   };
   
   /***
@@ -292,7 +296,7 @@ var events = require('events');
    * @return {boolean}
    */
   WebSmsCom.Message.prototype.getSendAsFlashSms = function(){
-    return this.data['sendAsFlashSms'];
+    return this.data.sendAsFlashSms;
   };
   
   /***
@@ -304,12 +308,12 @@ var events = require('events');
    */
   WebSmsCom.Message.prototype.setSendAsFlashSms = function(sendAsFlashSms){
     if (sendAsFlashSms === undefined || typeof sendAsFlashSms === 'boolean') {
-      this.data['sendAsFlashSms'] = sendAsFlashSms;
+      this.data.sendAsFlashSms = sendAsFlashSms;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("sendAsFlashSms '" + sendAsFlashSms + "' invalid. Must be undefined, true or false."));
       return;
     }
-    return this.data['sendAsFlashSms'];
+    return this.data.sendAsFlashSms;
   };
   
   /***
@@ -318,7 +322,7 @@ var events = require('events');
    * @return {string} notificationCallbackUrl
    */
   WebSmsCom.Message.prototype.getNotificationCallbackUrl = function(){
-    return this.data['notificationCallbackUrl'];
+    return this.data.notificationCallbackUrl;
   };
   
   /***
@@ -332,12 +336,12 @@ var events = require('events');
    */
   WebSmsCom.Message.prototype.setNotificationCallbackUrl = function(notificationCallbackUrl){
     if (notificationCallbackUrl === undefined || typeof notificationCallbackUrl === 'string') {
-      this.data['notificationCallbackUrl'] = notificationCallbackUrl;
+      this.data.notificationCallbackUrl = notificationCallbackUrl;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("notificationCallbackUrl '" + notificationCallbackUrl + "' invalid. Must be string. "));
       return;
     }
-    return this.data['notificationCallbackUrl'];
+    return this.data.notificationCallbackUrl;
   };
   
   /***
@@ -346,7 +350,7 @@ var events = require('events');
    * @return {string} clientMessageId set for this Message object
    */
   WebSmsCom.Message.prototype.getClientMessageId = function(){
-    return this.data['clientMessageId'];
+    return this.data.clientMessageId;
   };
   
   /***
@@ -360,12 +364,12 @@ var events = require('events');
    */
   WebSmsCom.Message.prototype.setClientMessageId = function(clientMessageId){
     if (clientMessageId === undefined || typeof clientMessageId === 'string') {
-      this.data['clientMessageId'] = clientMessageId;
+      this.data.clientMessageId = clientMessageId;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("clientMessageId '" + clientMessageId + "' invalid. Must be string."));
       return;
     }
-    return this.data['clientMessageId'];
+    return this.data.clientMessageId;
   };
   
   /***
@@ -374,7 +378,7 @@ var events = require('events');
    * @return {number} priority set for this Message object
    */
   WebSmsCom.Message.prototype.getPriority = function(){
-    return this.data['priority'];
+    return this.data.priority;
   };
   
   /***
@@ -387,12 +391,12 @@ var events = require('events');
    */
   WebSmsCom.Message.prototype.setPriority = function(priority){
     if (priority === undefined || typeof priority === 'number') {
-      this.data['priority'] = priority;
+      this.data.priority = priority;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("priority '" + priority + "' invalid. Must be a number."));
       return;
     }
-    return this.data['priority'];
+    return this.data.priority;
   };
   
   /***
@@ -400,35 +404,35 @@ var events = require('events');
    *
    * @param {Array} recipientAddressList
    * @param {string} messageContent
-   * @param {Function} errorCallback
+   * @param {Function} callback
    * @return {Object} TextMessage
    */
-  WebSmsCom.TextMessage = function(recipientAddressList, messageContent, errorCallback){
+  WebSmsCom.TextMessage = function(recipientAddressList, messageContent, callback){
     WebSmsCom.log("Text constructor", this);
     // privates
-    var errCb = errorCallback;
+    var cb = callback;
     var oCfg;
     
     if (typeof recipientAddressList === 'object' &&
         messageContent === undefined &&
-        errorCallback === undefined) {
+        callback === undefined) {
       // quick usage
       oCfg= recipientAddressList;
       recipientAddressList = oCfg.recipientAddressList;
-      errCb = oCfg.errorCallback;
+      cb = oCfg.cb || oCfg.callback;
       messageContent = oCfg.messageContent;
     }
     
     // register events before calling WebSmsCom.Message
     this.on('error', function(errorObj){
-      WebSmsCom.defaultErrorCallback(errorObj, errCb, this);
+      WebSmsCom.defaultErrorCallback(errorObj, cb, this);
     });
     
     // call WebSmsCom.Message (Baseclass)
     WebSmsCom.Message.call(this, recipientAddressList);
     
     // initialise TextStuff
-    this.data['messageContent'] = undefined;
+    this.data.messageContent = undefined;
     
     if (oCfg !== undefined) {
         // set all parameter the "quick" way from given object
@@ -439,7 +443,7 @@ var events = require('events');
         var cfgAttributes = Object.keys(oCfg);
         for (var k=0;k<cfgAttributes.length;k++) {
             var attr = cfgAttributes[k];
-            if (attr === 'recipientAddressList' || attr === 'errorCallback') {
+            if (attr === 'recipientAddressList' || attr === 'callback' || attr === 'cb') {
                 continue;
             }
             if (isDataKey[attr]) {
@@ -463,7 +467,7 @@ var events = require('events');
    * @return {string} messageContent
    */
   WebSmsCom.TextMessage.prototype.getMessageContent = function(){
-    return this.data['messageContent'];
+    return this.data.messageContent;
   };
   
   /***
@@ -474,12 +478,12 @@ var events = require('events');
    */
   WebSmsCom.TextMessage.prototype.setMessageContent = function(messageContent){
     if (messageContent !== undefined && typeof messageContent === 'string') {
-      this.data['messageContent'] = messageContent;
+      this.data.messageContent = messageContent;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("Invalid messageContent for TextMessage. Must be utf8/unicode."));
       return;
     }
-    return this.data['messageContent'];
+    return this.data.messageContent;
   };
   
   
@@ -489,35 +493,35 @@ var events = require('events');
    * @param {Array} recipientAddressList - Example: ['4367612345678','4369912345678']
    * @param {Array} messageContent - segments of base64 strings (binary encoded to base64)
    *                                 Example: ["BQAD/AIBWnVzYW1tZW4=", "BQAD/AICZ2Vmw7xndC4="]
-   * @param {Function} errorCallback function (optional) when message creation fails
+   * @param {Function} callback function (optional) when message creation fails
    * @return {Object} BinaryMessage Object
    */
-  WebSmsCom.BinaryMessage = function BinaryMessage(recipientAddressList, messageContent, userDataHeaderPresent, errorCallback){
+  WebSmsCom.BinaryMessage = function BinaryMessage(recipientAddressList, messageContent, userDataHeaderPresent, callback){
     WebSmsCom.log("Binary constructor", this);
     // privates
-    var errCb = errorCallback;
+    var cb = callback;
     var oCfg;
     
     if (typeof recipientAddressList === 'object' &&
         messageContent === undefined &&
-        errorCallback === undefined) {
+        callback === undefined) {
       // quick usage
       oCfg= recipientAddressList;
       recipientAddressList = oCfg.recipientAddressList;
-      errCb = oCfg.errorCallback;
+      cb = oCfg.callback || oCfg.cb;
       messageContent = oCfg.messageContent;
     }
     // register events before calling WebSmsCom.Message
     this.on('error', function(errorObj){
-      WebSmsCom.defaultErrorCallback(errorObj, errCb, this);
+      WebSmsCom.defaultErrorCallback(errorObj, cb, this);
     });
     
     // call WebSmsCom.Message (Baseclass)
     WebSmsCom.Message.call(this, recipientAddressList);
     
     // initialise BinaryStuff
-    this.data['messageContent'] = [];
-    this.data['userDataHeaderPresent'] = undefined;
+    this.data.messageContent = [];
+    this.data.userDataHeaderPresent = undefined;
     
     if (oCfg !== undefined) {
         // set all parameter the "quick" way from given object
@@ -528,7 +532,7 @@ var events = require('events');
         var cfgAttributes = Object.keys(oCfg);
         for (var k = 0; k < cfgAttributes.length; k++) {
             var attr = cfgAttributes[k];
-            if (attr === 'recipientAddressList' || attr === 'errorCallback') {
+            if (attr === 'recipientAddressList' || attr === 'callback' || attr === 'cb') {
                 continue;
             }
             if (isDataKey[attr]) {
@@ -553,7 +557,7 @@ var events = require('events');
    * @return {string} messageContent
    */
   WebSmsCom.BinaryMessage.prototype.getMessageContent = function(){
-    return this.data['messageContent'];
+    return this.data.messageContent;
   };
   
   /***
@@ -564,12 +568,12 @@ var events = require('events');
    */
   WebSmsCom.BinaryMessage.prototype.setMessageContent = function(messageContent){
     if (messageContent !== undefined && util.isArray(messageContent)) {
-      this.data['messageContent'] = messageContent;
+      this.data.messageContent = messageContent;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("Invalid messageContent for BinaryMessage. Must be array of strings containing Base64 encoded Binary"));
       return;
     }
-    return this.data['messageContent'];
+    return this.data.messageContent;
   };
   
   /***
@@ -578,7 +582,7 @@ var events = require('events');
    * @return {boolean} userDataHeaderPresent
    */
   WebSmsCom.BinaryMessage.prototype.getUserDataHeaderPresent = function(){
-    return this.data['userDataHeaderPresent'];
+    return this.data.userDataHeaderPresent;
   };
   
   /***
@@ -589,12 +593,12 @@ var events = require('events');
    */
   WebSmsCom.BinaryMessage.prototype.setUserDataHeaderPresent = function(userDataHeaderPresent){
     if (userDataHeaderPresent !== undefined && typeof userDataHeaderPresent === 'boolean') {
-      this.data['userDataHeaderPresent'] = userDataHeaderPresent;
+      this.data.userDataHeaderPresent = userDataHeaderPresent;
     } else {
       this.emit('error', WebSmsCom.getErrorObj("Invalid userDataHeaderPresent for BinaryMessage. Must be boolean"));
       return;
     }
-    return this.data['userDataHeaderPresent'];
+    return this.data.userDataHeaderPresent;
   };
   
   
@@ -641,11 +645,10 @@ var events = require('events');
    * _responseCallback
    *    Internal response callback function that will be attached to http response
    *
-   * @param {Function} cb    - ok callback function
-   * @param {Function} errCb - error callback function
+   * @param {Function} cb    - callback function
    * @param {Object} message - Message Object (TextMessage or BinaryMessage)
    */
-  WebSmsCom.Client.prototype._responseCallback = function(cb, errCb, message){
+  WebSmsCom.Client.prototype._responseCallback = function(cb, message){
     return function(response){
       var str = '';
       
@@ -659,24 +662,27 @@ var events = require('events');
       
         WebSmsCom.log('--- RESPONSE RECEIVED --:\n' + str + '\n-------------\n');
         
-        var isReadable = /json/.test(response.headers['content-type']);
-        var msg = 'Internal Error';
+        var isReadable = /json/.test(response.headers['content-type']),
+            msg = 'Internal Error',
+            cause,
+            errorObj,
+            ApiResponse;
         
         if (response.statusCode != 200 || !isReadable) {
           // HTTP failed
-          var msg = "HTTP Connection failed, Server returned HTTP Status: " + response.statusCode;
-          var cause = WebSmsCom.errorCauses['parameter'];
+          msg = "HTTP Connection failed, Server returned HTTP Status: " + response.statusCode;
+          cause = WebSmsCom.errorCauses.parameter;
           if (response.statusCode == 401) {
             msg = "HTTP Authentication failed, check username and password. HTTP Status: " + response.statusCode;
-            cause = WebSmsCom.errorCauses['authorization'];
+            cause = WebSmsCom.errorCauses.authorization;
           } else if (response.statusCode == 400) {
             msg = "HTTP Status 400 - Bad Request. Server couldnot understand Request/Content. " + str;
-            cause = WebSmsCom.errorCauses['unknown'];
+            cause = WebSmsCom.errorCauses.unknown;
           } else if (!isReadable && response.statusCode == 200) {
             msg = "HTTP Response is of unknown content-type '" + response.headers['content-type'] + "', Response body was: " + str;
-            cause = WebSmsCom.errorCauses['unknown'];
+            cause = WebSmsCom.errorCauses.unknown;
           }
-          var errorObj = WebSmsCom.getErrorObj({
+          errorObj = WebSmsCom.getErrorObj({
             'cause': cause,
             'message': msg,
             //responseObject: response,
@@ -684,12 +690,11 @@ var events = require('events');
             'error': undefined,
             'throwError': false
           });
-          WebSmsCom.defaultErrorCallback(errorObj, errCb, message);
+          WebSmsCom.defaultErrorCallback(errorObj, cb, message);
           
         } else {
           // HTTP success and isReadable
           if (cb) {
-            var ApiResponse;
             try {
               ApiResponse = JSON.parse(str);
             } catch (err) {
@@ -700,18 +705,18 @@ var events = require('events');
                 statusCode: 0
               };
             }
-            if (ApiResponse['statusCode'] < 2000 || ApiResponse['statusCode'] > 2001) {
+            if (ApiResponse.statusCode < 2000 || ApiResponse.statusCode > 2001) {
               // API failed
-              msg = 'API statusCode: ' + ApiResponse['statusCode'] + ', statusMessage: ' + ApiResponse['statusMessage'];
-              var errorObj = WebSmsCom.getErrorObj({
-                'cause': WebSmsCom.errorCauses['api'],
+              msg = 'API statusCode: ' + ApiResponse.statusCode + ', statusMessage: ' + ApiResponse.statusMessage;
+              errorObj = WebSmsCom.getErrorObj({
+                'cause': WebSmsCom.errorCauses.api,
                 'message': msg,
                 //messageObject: message,
                 'apiResponse': ApiResponse,
                 'error': undefined,
                 'throwError': false
               });
-              WebSmsCom.defaultErrorCallback(errorObj, errCb, message);
+              WebSmsCom.defaultErrorCallback(errorObj, cb, message);
             } else {
               // success
               WebSmsCom.defaultOkCallback(cb, ApiResponse, message);
@@ -723,27 +728,27 @@ var events = require('events');
       
       response.on('error', function(e){
         var errorObj = WebSmsCom.getErrorObj({
-          'cause': WebSmsCom.errorCauses['connection'],
+          'cause': WebSmsCom.errorCauses.connection,
           'message': 'HTTPS Response error event: ' + e.message,
           //messageObject: message,
           'error': e,
           'throwError': false
         });
-        WebSmsCom.defaultErrorCallback(errorObj, errCb, message);
+        WebSmsCom.defaultErrorCallback(errorObj, cb, message);
       });
       
       response.on('close', function(e){
         var errorObj = WebSmsCom.getErrorObj({
-          'cause': WebSmsCom.errorCauses['connection'],
+          'cause': WebSmsCom.errorCauses.connection,
           'message': 'HTTPS Response close event: ' + e.message,
           //messageObject: message,
           'error': e,
           'throwError': false
         });
-        WebSmsCom.defaultErrorCallback(errorObj, errCb, message);
+        WebSmsCom.defaultErrorCallback(errorObj, cb, message);
       });
       
-    }
+    };
   };
   
   /***
@@ -751,20 +756,20 @@ var events = require('events');
    *    Internal callback function attached to https request
    *    Used to handle error listener of request (when no response can occurr)
    *
-   * @param {Function} errCb - error callback function
+   * @param {Function} cb - error callback function
    * @param {Object} message - Message object (TextMessage or BinaryMessage)
    */
-  WebSmsCom.Client.prototype._requestCallback = function(errCb, message){
+  WebSmsCom.Client.prototype._requestErrorCallback = function(cb, message){
     return function(e){
       var errorObj = WebSmsCom.getErrorObj({
-        'cause': WebSmsCom.errorCauses['connection'],
+        'cause': WebSmsCom.errorCauses.connection,
         'message': 'HTTPS request error: ' + e.message,
         //messageObject: message,
         'error': e,
         'throwError': false
       });
-      WebSmsCom.defaultErrorCallback(errorObj, errCb, message);
-    }
+      WebSmsCom.defaultErrorCallback(errorObj, cb, message);
+    };
   };
   
   /***
@@ -774,10 +779,9 @@ var events = require('events');
    * @param {string} path   - endpoint path for text or binary
    * @param {Object} data   - content message data
    * @param {Function} cb   - callback function when message was transferred
-   * @param {Function} errCb - callback function when message was not transferred
    * @param {Object} message - full Message object that is posted to be passed through
    */
-  WebSmsCom.Client.prototype._post = function(path, data, cb, errCb, message){
+  WebSmsCom.Client.prototype._post = function(path, data, cb, message){
   
     var content = JSON.stringify(data);
     
@@ -791,9 +795,9 @@ var events = require('events');
    
     WebSmsCom.log("https request opts:", opts);
     
-    var request = https.request(opts, this._responseCallback(cb, errCb, message));
+    var request = https.request(opts, this._responseCallback(cb, message));
     
-    request.on('error', this._requestCallback(errCb, message));
+    request.on('error', this._requestErrorCallback(cb, message));
     
     WebSmsCom.log("https request content:", content);
     request.write(content);
@@ -815,25 +819,26 @@ var events = require('events');
    * @param {Object} message        - Message Object (TextMessage or BinaryMessage)
    * @param {int} maxSmsPerMessage  - Amount
    * @param {boolean} isTest        - set to false to really send SMS
-   * @param {Function} cb           - function called when message was transferred. Params: cb(ApiResponse,messageObj)
-   * @param {Function} errCb        - error callback function when message was (probably) not transferred. Params: errCb(errorObj,messageObj)
+   * @param {Function} cb           - function called when message was transferred. Params: cb(err, messageObj)
    */
-  WebSmsCom.Client.prototype.send = function(message, maxSmsPerMessage, isTest, cb, errCb){
-    var message_path;
-    var data;
+  WebSmsCom.Client.prototype.send = function(message, maxSmsPerMessage, isTest, cb){
+    var message_path,
+        data,
+        msg;
+    
     if (message instanceof WebSmsCom.TextMessage || message instanceof WebSmsCom.BinaryMessage) {
       data = message.getData();
       if (isTest !== undefined) {
         if (typeof isTest === 'boolean') {
-          data['test'] = isTest;
+          data.test = isTest;
         } else {
-          var msg = "Invalid isTest parameter '" + isTest + "' must be boolean.";
+          msg = "Invalid isTest parameter '" + isTest + "' must be boolean.";
           WebSmsCom.defaultErrorCallback(WebSmsCom.getErrorObj({
-            'cause': WebSmsCom.errorCauses['parameter'],
+            'cause': WebSmsCom.errorCauses.parameter,
             'message': msg,
             'error': new Error(msg),
             'throwError': false
-          }), errCb, message);
+          }), cb, message);
           return;
         }
       }
@@ -842,15 +847,15 @@ var events = require('events');
         message_path = this.path_text;
         if (maxSmsPerMessage !== undefined) {
           if (maxSmsPerMessage > 0 && maxSmsPerMessage < 256) {
-            data['maxSmsPerMessage'] = maxSmsPerMessage;
+            data.maxSmsPerMessage = maxSmsPerMessage;
           } else {
-            var msg = "Invalid maxSmsPerMessage parameter '" + maxSmsPerMessage + "' must be 1-255.";
+            msg = "Invalid maxSmsPerMessage parameter '" + maxSmsPerMessage + "' must be 1-255.";
             WebSmsCom.defaultErrorCallback(WebSmsCom.getErrorObj({
-              'cause': WebSmsCom.errorCauses['parameter'],
+              'cause': WebSmsCom.errorCauses.parameter,
               'message': msg,
               'error': new Error(msg),
               'throwError': false
-            }), errCb, message);
+            }), cb, message);
             return;
           }
         }
@@ -859,16 +864,16 @@ var events = require('events');
         message_path = this.path_binary;
       }
     } else {
-      var msg = 'Unknown message object instance. Neither TextMessage nor BinaryMessage.';
+      msg = 'Unknown message object instance. Neither TextMessage nor BinaryMessage.';
       WebSmsCom.defaultErrorCallback(WebSmsCom.getErrorObj({
-        'cause': WebSmsCom.errorCauses['parameter'],
+        'cause': WebSmsCom.errorCauses.parameter,
         'message': msg,
         'error': new Error(msg),
         'throwError': false
-      }), errCb, message);
+      }), cb, message);
       return;
     }
-    this._post(message_path, data, cb, errCb, message);
+    this._post(message_path, data, cb, message);
   };
   
   
