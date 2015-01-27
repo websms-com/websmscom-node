@@ -30,18 +30,18 @@
       
       Put this file next to your node application in the same folder.
 
-      $ npm install websmscom-1.0.0.tgz 
+      $ npm install websmscom-1.0.1.tgz 
       
         will create a local ./node_modules in the current directory
         
         In this directory you can now do "var websms = require('./websmscom')" in your js programs
     
     
-    OR just unpack / unzip websmscom-1.0.0.tgz 
+    OR just unpack / unzip websmscom-1.0.1.tgz 
     
       Put this file next to your node application in the same folder.
              
-      $ tar -xf websmscom-1.0.0.tgz
+      $ tar -xf websmscom-1.0.1.tgz
         
         will unpack it to a directory named 'package' wherefrom you can install it:
         
@@ -59,7 +59,7 @@
   
   In case you want to install it globally (add -g to any install suggestions above):
   
-    $ sudo npm install -g websmscom-1.0.0.tgz
+    $ sudo npm install -g websmscom-1.0.1.tgz
   
   If globally installed, websmscom can be called directly to send sms like:
     $ websmscom --send --m="This is the message text" --r=4369912345678 --u Username --p Password

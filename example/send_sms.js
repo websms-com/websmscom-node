@@ -29,16 +29,16 @@ function main(){
   var myClient = new websms.Client(gatewayUrl, username, password);
   
   // 2.) -- create text message ----------------
-  //     Create Message objects between try..catch to catch invalid parameters at creation
-  //     and stop further broken creations or you set 'websms.doThrowMessageCreationError = false;'
+  //     Create Message objects between try..catch to catch invalid parameters at creation.
+  //     Message object is an EventEmitter and will exit at invalid creation or invalid parameters
   
   var myMessage;
   
   try {
   
-    myMessage = new websms.TextMessage(recipientAddressList, unicodeMessageText, creationFailedCallback);
-    //myMessage = example_createBinaryMessage(); // binary example
+    myMessage = new websms.TextMessage(recipientAddressList, unicodeMessageText);
     //myMessage.setClientMessageId("CustomMessageId-123"); // set additional properties (or write 'new TextMessage({clientMessageId:"myId"})' 
+    //myMessage = example_createBinaryMessage(); // binary example
 
   } catch (e) {
     console.log('Caught message creation error: ', e.message);
@@ -47,53 +47,48 @@ function main(){
   }
   
   // 3.) -- send message ------------------
-  myClient.send(myMessage, maxSmsPerMessage, isTest, transferredCallback, notTransferredCallback);
+  myClient.send(myMessage, maxSmsPerMessage, isTest, sendCallback);
   
-};
+}
 
-function transferredCallback(apiResponse, messageObject) {
+function sendCallback(err, apiResponse) {
+  
+  if (err) {
+    // ERROR
     
-    console.log("\n---- transferredCallback function called with ApiResponse:\n", apiResponse);
-    console.log('\n---- Related messageObject:\n', messageObject);
-    var statusCode      = apiResponse.statusCode;
-    var statusMessage   = apiResponse.statusMessage;
-    var transferId      = apiResponse.transferId;
-    var clientMessageId = apiResponse.clientMessageId;
-};
-
-
-function notTransferredCallback(errorObj, messageObject){
+    if (err.cause === 'parameter' ||
+        err.cause === 'authorization' ||
+        err.cause === 'connection' ||
+        err.cause === 'unknown') {
     
-    console.log("\n---- notTransferredCallback function called.\n");
-    
-    if (errorObj.cause === 'parameter' ||
-        errorObj.cause === 'authorization' ||
-        errorObj.cause === 'connection' ||
-        errorObj.cause === 'unknown') {
-    
-        console.log(errorObj.message);
-        //console.log("\n---- errorObj:\n", errorObj);
+        console.log(err.message);
         
-    } else if (errorObj.cause === 'api') {
+    } else if (err.cause === 'api') {
     
         // API responded, but some limit was hit 
         // statusCode and statusMessage are readable,
         // see API docs for codes
-        var apiResponse = errorObj.apiResponse;
         
-        var statusCode    = apiResponse.statusCode;
-        var statusMessage = apiResponse.statusMessage;
+        var statusCode    = err.apiResponse.statusCode;
+        var statusMessage = err.apiResponse.statusMessage;
         
-        console.log('\n---- apiResponse:\n', apiResponse);
+        console.log('\n---- apiResponse:\n', err.apiResponse);
     }
-    console.log('\n---- Related messageObject:\n', messageObject);
-};
-
-function creationFailedCallback(errorObj, incompleteMessageObject) {
+    console.log('\n---- Related messageObject:\n', err.messageObject);
+  
+  } else {
+    // OK
     
-    console.log("\n---- creationFailedCallback function called with errorObj:\n", errorObj);
-    console.log("incompleteMessageObject:", incompleteMessageObject);
-};
+    console.log("\n---- transferredCallback function called with ApiResponse:\n", apiResponse);
+    var statusCode      = apiResponse.statusCode;
+    var statusMessage   = apiResponse.statusMessage;
+    var transferId      = apiResponse.transferId;
+    var clientMessageId = apiResponse.clientMessageId;
+    var messageObject   = apiResponse.messageObject;
+    
+  }
+  
+}
 
 
 function example_createBinaryMessage() {

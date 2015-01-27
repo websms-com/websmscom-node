@@ -2,7 +2,7 @@ websmscom.js
 =========
 ### SMS text/binary messaging tool for node.js
 
-![](http://websms.com/images/global/logo_websms.png)
+![](https://www.websms.com/images/logo.png)
 
 `websmscom.js` module provides an easy-to-use API for sending SMS text and binary messages through websms.com API (`https://api.websms.com`) and is also usable as command line tool directly from bash.
  
@@ -19,7 +19,7 @@ An example code of how to use this nodejs module in your own scripts can be foun
  * Answers to SMS can be forwarded
  * Usable in modules and from command line
 
-See [websms.com](http://websms.com) website to [register](http://business.sms.at/get-started/online-anmeldung) for an account.
+See [websms.com](http://websms.com) website to [register](https://www.websms.com/websms-testen/) for an account.
 
 For general API specification of the server (nodejs independent) visit: [https://api.websms.com](https://api.websms.com)
 
@@ -58,12 +58,12 @@ Usage
 3. Create a Message object (or many)
 
   ```
-  var myMessage = new websms.TextMessage(recipientAddressList, unicodeMessageText, creationFailedCallback);
+  var myMessage = new websms.TextMessage(recipientAddressList, unicodeMessageText, [creationFailedCallback]);
   ```
 4. Send Message object over Client
 
   ```
-  myClient.send(myMessage, maxSmsPerMessage, isTest, transferredCallback, notTransferredCallback);
+  myClient.send(myMessage, maxSmsPerMessage, isTest, callback);
   ```
 
 #### Parameters explained:
@@ -75,7 +75,7 @@ Usage
  * __creationFailedCallback__ : {Function} function that is called when creation of message failed
  * __maxSmsPerMessage__ : {Number} integer number 1-255 telling how many concatenated sms parts are the limit for sending this message. (in case the text is longer than what fits into multiple sms)
  * __isTest__ : {boolean} false to really send sms. true to just test interface connection and process
- * __transferredCallback__ : {Function} function that is called when message was transferred to API. Called with parameters
+ * __callback__ : {Function} callback at error or success
  
  
 
@@ -115,18 +115,16 @@ Full Example
     }
 
     // 3. Send Message object over Client
-    myClient.send(myMessage, maxSmsPerMessage, isTest, transferredCallback, notTransferredCallback);
+    myClient.send(myMessage, maxSmsPerMessage, isTest, callback);
 
     // Finished
 
 
-    function transferredCallback(ApiReponse, messageObject) {
-      console.log(ApiReponse, messageObject);
+    function callback(errorObject, apiResponse) {
+      console.log(ApiReponse, apiResponse);
     }
 
-    function notTransferredCallback(errorObj, messageObject) {
-      console.log(errorObj, messageObject);
-    }
+    
 
 
 You can also prevent the throwing of exceptions by just setting 
@@ -287,20 +285,20 @@ Classes
 #### Client
  > new websms.Client(*gatewayUrl, user, password*)
  
- ##### Methods/Functions
+##### Methods/Functions
      Client.send(messageObject, maxSmsPerMessage, isTest, transferredCallback, notTransferredCallback)
      
 #### TextMessage
  > new websms.TextMessage(*recipientAddressList, messageContent, creationFailedCallback*)
 
- ##### Methods/Functions
+##### Methods/Functions
      TextMessage.getMessageContent()
      TextMessage.setMessageContent(messageContent)
 
 #### BinaryMessage
  > new websms.BinaryMessage(*recipientAddressList, messageContentSegments, uerDataHeaderPresent, creationFailedCallback*)
  
- ##### Methods/Functions
+##### Methods/Functions
      BinaryMessage.getMessageContent()
      BinaryMessage.setMessageContent(messageContentSegments)
      BinaryMessage.getUserDataHeader()
@@ -309,7 +307,7 @@ Classes
 #### Message
  > Base class for all messages  (every message inherits from Event.Emitter)
 
- ##### Methods/Functions
+##### Methods/Functions
      Message.getRecipientAddressList()
      Message.setRecipientAddressList(recipentAddressList)
      Message.checkRecipientAddressList(recipentAddressList)

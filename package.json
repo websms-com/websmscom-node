@@ -1,6 +1,6 @@
 {
   "name": "websmscom",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Send text or binary SMS messages over websms.com.",
   "keywords":["sms", "binary", "text", "asynchron", "text message"],
   "bugs": {"email": "gerd.reifenauer@ut11.net"},

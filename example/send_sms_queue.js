@@ -25,34 +25,36 @@ function main() {
     
     var queue_position    = 0;
 
-    var transferredCallback = function() {
+    var createCallback = function() {
         
-        return function(apiResponse, messageObject) {
-            console.log("queue_position " + queue_position + " transferred, send next message...", messageObject.getMessageContent());
-            // send next one
-            queue_position++
-            sendSms(queue_position);
-        }
-    } 
-    
-    var notTransferredCallback = function() {
-        
-        return function(errorObj, messageObject) {
+        return function(errorObj, apiResponse) {
+          
+          if (errorObj) {
+            
             console.log(queue_position + " not transferred, stop the whole process.");
             console.log(errorObj.message);
-            console.log('Untransferred Message had message id: ',messageObject.getClientMessageId());
+            console.log('Untransferred Message had message id: ',errorObj.messageObject.getClientMessageId());
             
             if (errorObj.cause === 'api' && errorObj.apiResponse.statusCode === 4023) {
                 // limit hit
                 console.log("Will try again in 10 seconds");
                 setTimeout(function(){
                     sendSms(queue_position);
-                }, 10000)
+                }, 10000);
             } else {
                 console.log("Will not retry, stop.");
             }
-        }
-    }
+            
+          } else {
+            
+            console.log("queue_position " + queue_position + " transferred, send next message...", apiResponse.messageObject.getMessageContent());
+            // send next one
+            queue_position++;
+            sendSms(queue_position);
+            
+          }
+        };
+    };
     
     var sendSms = function(position) {
         
@@ -64,12 +66,12 @@ function main() {
             );
            
             // send message
-            myClient.send(message_queue[position], maxSmsPerMessage, isTest, transferredCallback(), notTransferredCallback());
+            myClient.send(message_queue[position], maxSmsPerMessage, isTest, createCallback());
             
         } else {
             console.log("No (more) messages");
         }
-    }
+    };
     
     // Create all messages
     var message_queue = generate_messages(30);
@@ -88,7 +90,7 @@ function generate_messages(amount){
   //     Create Message objects between try..catch to catch invalid parameters at creation
   //     and stop further broken creations or you set 'websms.doThrowMessageCreationError = false;'
   
-  var messages = [];;
+  var messages = [];
   
   // generate 100 random messages
   try {
@@ -109,7 +111,7 @@ function generate_messages(amount){
   }
 
   return messages;
-};
+}
 
 main();
 
