@@ -212,18 +212,20 @@ function doTests() {
     var client = new websms.Client(websms.defaultGatewayUrl,'nodejs','nodejs');
     assert.deepEqual(typeof client.send, 'function');
     
-    function callbackExpected(first){
+    
+    function callbackErrorExpected(err,ok){
+      if (err) {
         assert.ok(true, "Correct Callback");
-    }
-    function callbackNotExpected(first){
+      } else {
         assert.ok(false, "Incorrect Callback");
+      }
     }
    
     assert.doesNotThrow(function() {
-        client.send(messageOk, -1, true, callbackNotExpected, callbackExpected); // calls error callback (ok)
+        client.send(messageOk, -1, true, callbackErrorExpected); // calls error callback (ok)
     });
     assert.doesNotThrow(function() {
-        client.send(messageOk, 1, true, callbackNotExpected, callbackExpected); // calls error callback (ok)
+        client.send(messageOk, 1, true, callbackErrorExpected); // calls error callback (ok)
     });
 
     console.log("Passed tests. OK.");
@@ -248,7 +250,7 @@ function doSend(SetArgs){
         console.log('Caught error at message creation:',e.message,e.stack);
         process.exit(1);
     }
-    client.send(msg, SetArgs['max'], SetArgs['t'], transferredCallback, notTransferredCallback);
+    client.send(msg, SetArgs['max'], SetArgs['t'], callback);
 }
  
 function getValues(obj){
@@ -262,14 +264,12 @@ function getValues(obj){
     return data;
 }
 
-function transferredCallback(apiResponse, messageObject) {
-    console.log(apiResponse);
+function callback(errorObj, apiResponse) {
+    console.log(errorObj, apiResponse);
 }
 
 
-function notTransferredCallback(errorObj, messageObject){
-    console.log(errorObj);
-}
+
 
 function printUsage() {
     // node websmscom.js --g http://192.168.11.111:8443/bpapi --u swtest --p 1234 --r=4367612345678 --m="Superduper kann ich nur sagen!" --s "REIFI" --st="national" --f --c "http://localhost/callback" --id="--custom ID" --prio 9 --send --t --v
