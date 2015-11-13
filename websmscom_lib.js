@@ -450,8 +450,12 @@ var events = require('events');
                 var attrFUC = attr.charAt(0).toUpperCase() + attr.substr(1);
                 this['set'+attrFUC].call(this,oCfg[attr]);
             } else {
-                this.emit('error', WebSmsCom.getErrorObj("Invalid attribute '"+attr+"' for '"+this.constructor.name+"'. Possible values are: "+Object.keys(this.data).join(',')));
-                return;
+              this.on('error', function(errorObj){
+                 WebSmsCom.defaultErrorCallback(errorObj, cb, this);
+              });
+              this.emit('error', WebSmsCom.getErrorObj("Invalid attribute '" + attr + "' for 'WebSmsCom.TextMessage" +
+                  "'. Possible values are: " + Object.keys(this.data).join(',') + " and callback"));
+              return;
             }
         }
     } else {

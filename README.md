@@ -2,7 +2,7 @@ websmscom.js
 =========
 ### SMS text/binary messaging tool for node.js
 
-![](https://www.websms.com/images/logo.png)
+![](https://websms.at/images/websms/system/websms-logo.png)
 
 `websmscom.js` module provides an easy-to-use API for sending SMS text and binary messages through websms.com API (`https://api.websms.com`) and is also usable as command line tool directly from bash.
  
@@ -208,7 +208,7 @@ You don't need to use setter methods, it's also possible create a message with a
            'priority'                : 1,
            'notificationCallbackUrl' : 'https://my_server_for_send_notification',
            'clientMessageId'         : "My custom message id",
-           'errorCallback'           : creationFailedCallback
+           'callback'                : callback
         });
 
 

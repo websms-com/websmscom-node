@@ -113,7 +113,7 @@ function example_createBinaryMessage() {
     console.log('segment_1: ' + new Buffer(segment_1, 'base64').toString('ascii'));
     console.log('segment_2: ' + new Buffer(segment_2, 'base64').toString('ascii'));
     
-    return new websms.BinaryMessage(recipientAddressList, messageContentSegments, userDataHeaderPresent, creationFailedCallback);
+    return new websms.BinaryMessage(recipientAddressList, messageContentSegments, userDataHeaderPresent, sendCallback);
 }
 
 main();
@@ -132,7 +132,7 @@ main();
        'priority'                : 1,
        'notificationCallbackUrl' : 'https://my_server_for_send_notification',
        'clientMessageId'         : "My custom message id",
-       'errorCallback'           : creationFailedCallback
+       'callback'                : sendCallback
     });
  * 
  */

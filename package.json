@@ -1,27 +1,44 @@
 {
   "name": "websmscom",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Send text or binary SMS messages over websms.com.",
-  "keywords":["sms", "binary", "text", "asynchron", "text message"],
-  "bugs": {"email": "gerd.reifenauer@ut11.net"},
+  "keywords": [
+    "sms",
+    "binary",
+    "text",
+    "asynchron",
+    "text message"
+  ],
+  "bugs": {
+    "email": "gerd.reifenauer@ut11.net"
+  },
   "homepage": "http://websms.com/",
   "author": {
     "name": "Gerd Reifenauer",
     "email": "gerd.reifenauer@ut11.net",
     "url": "http://websms.com"
   },
-  "contributors": [{
-    "name": "Up to Eleven",
-    "email": "office@ut11.net",
-    "url": "http://ut11.net"
-  }],
-  "files":["websmscom.js","websmscom_lib.js","example/send_sms.js","example/send_sms_queue.js","INSTALL","LICENSE"],
+  "contributors": [
+    {
+      "name": "Up to Eleven",
+      "email": "office@ut11.net",
+      "url": "http://ut11.net"
+    }
+  ],
+  "files": [
+    "websmscom.js",
+    "websmscom_lib.js",
+    "example/send_sms.js",
+    "example/send_sms_queue.js",
+    "INSTALL",
+    "LICENSE"
+  ],
   "license": "MIT",
   "main": "websmscom.js",
   "scripts": {
     "test": "node websmscom.js --moduletest"
   },
-  "bin":{
-    "websmscom" : "websmscom.js"
+  "bin": {
+    "websmscom": "websmscom.js"
   }
 }
