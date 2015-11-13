@@ -150,11 +150,29 @@ function doTests() {
     var messagetextError;
     var i;
     
+    //websms.isDebug = true;
+    
     console.log("Text Message creation tests.");
-    var messageOk;
+    var messageOk, quickMessageOk;
+    
     assert.doesNotThrow(function() {
         messageOk = new websms.TextMessage(recipientListOk,messagetextOk);
     });
+    
+    assert.doesNotThrow(function () {
+      quickMessageOk = new websms.TextMessage({
+        'recipientAddressList': recipientListOk,
+        'messageContent': messagetextOk,
+        'senderAddress': "AlphanumericSender",
+        'senderAddressType': 'alphanumeric', // also possible values: 'shortcode', 'international', 'national
+        'sendAsFlashSms': true,
+        'priority': 1,
+        'notificationCallbackUrl': 'https://my_server_for_send_notification',
+        'clientMessageId': "My custom message id",
+        'callback': callbackErrorExpected
+      });
+
+  });
         
     assert.throws(function() {
         var message = new websms.TextMessage(recipientListError,messagetextOk);
@@ -227,6 +245,13 @@ function doTests() {
     assert.doesNotThrow(function() {
         client.send(messageOk, 1, true, callbackErrorExpected); // calls error callback (ok)
     });
+    
+    assert.doesNotThrow(function() {
+        client.send(quickMessageOk, -1, true, callbackErrorExpected); // calls error callback (ok)
+    });
+    assert.doesNotThrow(function() {
+        client.send(quickMessageOk, 1, true, callbackErrorExpected); // calls error callback (ok)
+    });
 
     console.log("Passed tests. OK.");
 }
@@ -267,7 +292,6 @@ function getValues(obj){
 function callback(errorObj, apiResponse) {
     console.log(errorObj, apiResponse);
 }
-
 
 
 
