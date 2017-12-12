@@ -359,6 +359,11 @@ Sample object:
      clientMessageId : "<when defined in transferred message by user>";
     }
 
+Contributors
+------------
+
+* Gerd Reifenauer (Author) [@reifi](https://github.com/reifi)
+* Georg Hinteregger
 
 License
 -------
