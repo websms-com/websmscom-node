@@ -2,7 +2,7 @@ websmscom.js
 =========
 ### SMS text/binary messaging tool for node.js
 
-![](https://websms.at/images/websms/system/websms-logo.png)
+![](https://developer.websms.com/wp-content/themes/websms/_/img/websms-logo.png)
 
 `websmscom.js` module provides an easy-to-use API for sending SMS text and binary messages through websms.com API (`https://api.websms.com`) and is also usable as command line tool directly from bash.
  
@@ -19,7 +19,7 @@ An example code of how to use this nodejs module in your own scripts can be foun
  * Answers to SMS can be forwarded
  * Usable in modules and from command line
 
-See [websms.com](http://websms.com) website to [register](https://www.websms.com/websms-testen/) for an account.
+See [websms.com](http://websms.com) website to [register](https://account.websms.com/#/) for an account.
 
 For general API specification of the server (nodejs independent) visit: [https://api.websms.com](https://api.websms.com)
 
@@ -364,6 +364,10 @@ Contributors
 
 * Gerd Reifenauer (Author) [@reifi](https://github.com/reifi)
 * Georg Hinteregger
+
+Contact
+-------
+For any further questions into detail the contact-email is developer@websms.com
 
 License
 -------
