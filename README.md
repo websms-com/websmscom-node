@@ -365,7 +365,7 @@ License
 
 (The MIT License)
 
-Copyright (c) 2012 Up to Eleven Digital Solutions GmbH, Gerd Reifenauer &lt;gerd.reifenauer@ut11.net&gt;
+Copyright (c) 2012 sms.at mobile internet services gmbh
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

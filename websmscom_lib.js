@@ -16,7 +16,7 @@ var events = require('events');
   // Create a reference to this
   var WebSmsCom = {
   
-    VERSION: '1.0.1',
+    VERSION: '1.0.2',
     
     isDebug: false,
     
