@@ -742,6 +742,7 @@ var events = require('events');
       });
       
       response.on('close', function(e){
+        if (e === undefined) return;
         var errorObj = WebSmsCom.getErrorObj({
           'cause': WebSmsCom.errorCauses.connection,
           'message': 'HTTPS Response close event: ' + e.message,
