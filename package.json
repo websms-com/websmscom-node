@@ -1,6 +1,6 @@
 {
   "name": "websmscom",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Send text or binary SMS messages over websms.com.",
   "keywords": [
     "sms",
@@ -10,12 +10,12 @@
     "text message"
   ],
   "bugs": {
-    "email": "gerd.reifenauer@ut11.net"
+    "email": "gerd.reifenauer@websms.com"
   },
   "homepage": "http://websms.com/",
   "author": {
     "name": "Gerd Reifenauer",
-    "email": "gerd.reifenauer@ut11.net",
+    "email": "gerd.reifenauer@websms.com",
     "url": "http://websms.com"
   },
   "contributors": [
@@ -40,5 +40,9 @@
   },
   "bin": {
     "websmscom": "websmscom.js"
+  },
+  "repository": {
+	"type" : "git",
+	"url" : "https://github.com/websms-com/websmscom-node.git"
   }
 }
